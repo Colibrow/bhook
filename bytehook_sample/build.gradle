@@ -19,6 +19,9 @@ android {
         externalNativeBuild {
             cmake {
                 abiFilters rootProject.ext.abiFilters.split(",")
+                if(rootProject.ext.dependencyOnLocalLibrary) {
+                    arguments "-DLOCALTEST=ON"
+                }
             }
         }
     }
@@ -63,6 +66,7 @@ dependencies {
     } else {
         implementation 'com.bytedance:bytehook:1.0.10'
     }
+    implementation project(':bytehook_systest')
 }
 
 apply from: rootProject.file('gradle/sanitizer.gradle')

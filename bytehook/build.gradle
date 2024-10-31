@@ -40,9 +40,13 @@ android {
             minifyEnabled false
         }
     }
+    packagingOptions {
+        exclude '**/libshadowhook.so'
+    }
     buildFeatures {
         prefabPublishing true
         buildConfig false
+        prefab true
     }
     prefab {
         bytehook {
@@ -55,6 +59,10 @@ android {
             withJavadocJar()
         }
     }
+}
+
+dependencies {
+    api 'com.bytedance.android:shadowhook:' + rootProject.ext.shadowhookVersion
 }
 
 apply from: rootProject.file('gradle/check.gradle')

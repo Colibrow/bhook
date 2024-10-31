@@ -1,4 +1,4 @@
-// Copyright (c) 2020-2022 ByteDance, Inc.
+// Copyright (c) 2020-2024 ByteDance, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,38 +19,23 @@
 // SOFTWARE.
 //
 
-// Created by Kelun Cai (caikelun@bytedance.com) on 2020-06-02.
+// Created by Kelun Cai (caikelun@bytedance.com) on 2024-09-24.
 
 #pragma once
-#include <pthread.h>
-#include <stdbool.h>
 
-#include "queue.h"
-#include "tree.h"
+#include <stdint.h>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wpadded"
+#define BH_ARRAY_STACK_CAP 8
 
-typedef struct bh_hook_call {
-  void *func;
-  bool enabled;
-  uint32_t task_id;
-  SLIST_ENTRY(bh_hook_call, ) link;
-} bh_hook_call_t;
-typedef SLIST_HEAD(bh_hook_call_list, bh_hook_call, ) bh_hook_call_list_t;
+typedef struct {
+  uintptr_t *data;
+  size_t count;
+  size_t cap;
+  uintptr_t stack[BH_ARRAY_STACK_CAP];
+} bh_array_t;
 
-typedef struct bh_hook {
-  void *got_addr;
-  void *orig_func;
-  bh_hook_call_list_t running_list;
-  pthread_mutex_t running_list_lock;
-  RB_ENTRY(bh_hook) link;
-} bh_hook_t;
+#define BH_ARRAY_INITIALIZER(self) \
+  { .data = (self)->stack, .count = 0, .cap = BH_ARRAY_STACK_CAP }
 
-#pragma clang diagnostic pop
-
-bh_hook_t *bh_hook_create(void *got_addr, void *orig_func);
-void bh_hook_destroy(bh_hook_t **self);
-
-int bh_hook_add_func(bh_hook_t *self, void *func, uint32_t task_id);
-bool bh_hook_del_func(bh_hook_t *self, void *func);
+int bh_array_push(bh_array_t *self, uintptr_t value);
+void bh_array_free(bh_array_t *self);
